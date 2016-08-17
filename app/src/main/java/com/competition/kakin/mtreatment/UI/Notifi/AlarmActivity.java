@@ -164,6 +164,10 @@ public class AlarmActivity extends Activity implements AppCompatCallback, TimePi
     public ActionMode onWindowStartingSupportActionMode(ActionMode.Callback callback) {
         return null;
     }
+
+    /***
+     * 初始化日期
+     */
     private void init_date(){
         tvyear.setText(addAlarmProperty.getAlarmTime().get("year") + "");
         tvmonth.setText(addAlarmProperty.getAlarmTime().get("monthOfYear") + 1 + "");
@@ -171,6 +175,9 @@ public class AlarmActivity extends Activity implements AppCompatCallback, TimePi
 
     }
 
+    /***
+     * 设置属性，通过intent传回
+     */
     private void set_alarmProperty(){
         alarmTime.put("year", Integer.parseInt(tvyear.getText().toString()));
         alarmTime.put("monthOfYear", Integer.parseInt(tvmonth.getText().toString()));

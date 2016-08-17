@@ -24,14 +24,8 @@ public class ClockActivity extends Activity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_clock);
-        mediaPlayer = new MediaPlayer();
-        try {
-            mediaPlayer.setDataSource("/storage/sdcard1/musics/Do_You_Wanna_Go.mp3");
-            mediaPlayer.prepare();
-            mediaPlayer.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        mediaPlayer = MediaPlayer.create(ClockActivity.this, R.raw.sound);
+        mediaPlayer.start();
         new AlertDialog.Builder(ClockActivity.this).setTitle("闹钟").setMessage("dasfdf").setPositiveButton("close alarm",
         new DialogInterface.OnClickListener() {
             @Override
@@ -46,6 +40,7 @@ public class ClockActivity extends Activity{
                 if (addAlarmProperties.size() > 0){
                     addAlarmProperties.remove(p);
                     alarmInfo.setAlarm_Property(addAlarmProperties);
+
                 }
             }
         }).show();

@@ -38,6 +38,15 @@ public class CustomMethod {
         return isWork;
     }
 
+    /***
+     * 获取距离目标时间的长度
+     * @param year
+     * @param month
+     * @param day
+     * @param hour
+     * @param minute
+     * @return
+     */
     public long getTimebetWeen(int year, int month, int day, int hour, int minute){
         Calendar alarmCalendar = Calendar.getInstance();
         alarmCalendar.set(Calendar.MINUTE, minute);
@@ -67,6 +76,12 @@ public class CustomMethod {
         long TimebetWeen = alarmCalendar.getTimeInMillis() - System.currentTimeMillis();
         return TimebetWeen;
     }
+
+    /***
+     * 获取距离目标时间的长度，返回map格式
+     * @param targetTime
+     * @return
+     */
     public Map<String, Integer> getResTime(Map<String, Integer> targetTime){
         int minute = targetTime.get("minute");
         int hour = targetTime.get("hourOfDay");

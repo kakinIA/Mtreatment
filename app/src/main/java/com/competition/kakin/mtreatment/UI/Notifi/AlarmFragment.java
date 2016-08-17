@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -44,9 +45,6 @@ public class AlarmFragment extends Fragment {
     public static final int UPDATA_CONTENTS = 2;
     public static final int UPDATA_CONTENTDEL = 3;
     private boolean isBind = false;
-
-    private boolean isRegister = false;
-    private Map<String, Integer> theEndTime = new HashMap<>();
     private ListView listView;
     private ArrayList<MedAlarmContent> medAlarmContents = new ArrayList<>();
     private MedAlarmAdapter medAlarmAdapter;
@@ -63,7 +61,7 @@ public class AlarmFragment extends Fragment {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             switch (msg.what){
-                case UPDATA_TIME:
+                case UPDATA_TIME://更新时间到listview
                     SeriaLizableMapList timeMapList = (SeriaLizableMapList) msg.getData().getSerializable("resTimes");
                     List<Map<String, Integer>> resTimes = timeMapList.getMapList();
                     for (int i = 0; i < resTimes.size(); i++){
@@ -72,14 +70,14 @@ public class AlarmFragment extends Fragment {
                         medAlarmAdapter.notifyDataSetChanged();
                     }
                     break;
-                case UPDATA_CONTENTS:
+                case UPDATA_CONTENTS://剩余时间为0时删除content而更新listview
                     ArrayList<MedAlarmContent> medAlarmContentList = msg.getData().getParcelableArrayList("upDataContents");
                     medAlarmContents = medAlarmContentList;
                     medAlarmAdapter = new MedAlarmAdapter(getContext(), R.layout.medalarm_cell, medAlarmContents);
                     listView.setAdapter(medAlarmAdapter);
                     medAlarmAdapter.notifyDataSetChanged();
                     break;
-                case UPDATA_CONTENTDEL:
+                case UPDATA_CONTENTDEL://主动删除content而更新listview
                     ArrayList<MedAlarmContent> medAlarmContentLista = msg.getData().getParcelableArrayList("medAlarmContents");
                     medAlarmAdapter = new MedAlarmAdapter(getContext(), R.layout.medalarm_cell, medAlarmContentLista);
                     listView.setAdapter(medAlarmAdapter);
@@ -123,7 +121,7 @@ public class AlarmFragment extends Fragment {
         fabHist = (FloatingActionButton) view.findViewById(R.id.btn_alarm_history);
         fabAdd.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View v) {//添加alarm
 //                startActivity(new Intent(getContext(), AlarmAddActivity.class));
                 startActivityForResult(new Intent(getContext(), AlarmAddActivity.class), 2);
             }
@@ -131,30 +129,10 @@ public class AlarmFragment extends Fragment {
         fabHist.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                isRegister = false;
-//                getActivity().unbindService(conn);
-//                isBind = false;
-//                getActivity().stopService(new Intent(getContext(), AlarmService.class));
-//                isServiceStart = false;
+
             }
         });
-                theEndTime.put("hour", 17);
-                theEndTime.put("minute", 35);
-//                if(medAlarmContents != null){
-//                    Intent i = new Intent(getContext(), AlarmService2.class);
-//                    Bundle b = new Bundle();
-//                    b.putParcelableArrayList("medAlarmContents", medAlarmContents);
-//                    i.putExtras(b);
-//                    if (!isServiceStart){
-//                        if (i != null){
-//                            getActivity().startService(i);
-//                            isServiceStart = true;
-//                            getActivity().bindService(i, conn, Context.BIND_AUTO_CREATE);
-//                            isBind = true;
-//                        }
-//                    }
-//                }
-        initAlarmContents();
+        initAlarmContents();//初始化content
     }
 
     private ServiceConnection conn = new ServiceConnection() {
@@ -165,7 +143,7 @@ public class AlarmFragment extends Fragment {
 //            timeBinder.setEndTime(theEndTime);
             timeBinder.getService().setShowCallBack(new AlarmService2.ShowCallBack() {
                 @Override
-                public void onTimeShow(ArrayList<Map<String, Integer>> resTimes) {
+                public void onTimeShow(ArrayList<Map<String, Integer>> resTimes) {//每过1s回调resTime（剩余时间）一次
                     Message msg = new Message();
                     msg.what = UPDATA_TIME;
                     Bundle b = new Bundle();
@@ -180,15 +158,16 @@ public class AlarmFragment extends Fragment {
                 }
 
                 @Override
-                public void setEndContent(ArrayList<MedAlarmContent> medAlarmContentlist) {
-                    System.out.println("执行了setEndContent");
-                    Message msg = new Message();
-                    msg.what = UPDATA_CONTENTS;
-                    Bundle b =new Bundle();
-                    b.putParcelableArrayList("upDataContents", medAlarmContentlist);
-                    msg.setData(b);
-                    handler.sendMessage(msg);
-
+                public void setEndContent(ArrayList<MedAlarmContent> medAlarmContentlist) {//每过1s回调一次更新content
+                    medAlarmContents = medAlarmContentlist;
+                    if (medAlarmContents.size() == 0){
+                        Message msg = new Message();
+                        msg.what = UPDATA_CONTENTS;
+                        Bundle b =new Bundle();
+                        b.putParcelableArrayList("upDataContents", medAlarmContentlist);
+                        msg.setData(b);
+                        handler.sendMessage(msg);
+                    }
                 }
             });
         }
@@ -199,13 +178,9 @@ public class AlarmFragment extends Fragment {
         }
     };
 
-    private void doRegisterReceiver(){
-        AddAlarmProperty alarmProperty = null;
-        alarmPropertyReceiver = new AlarmPropertyReceiver(getContext(), alarmProperty, medAlarmContents, medAlarmAdapter, listView, conn);
-        IntentFilter filter = new IntentFilter("com.competition.kakin.mtreatment.broadcast.alarmpropertybroadcast");
-        getActivity().registerReceiver(alarmPropertyReceiver, filter);
-
-    }
+    /***
+     * 初始化listview的content
+     */
     private void initAlarmContents(){
         AlarmInfo alarmInfo = new AlarmInfo(getContext());
         ArrayList<AddAlarmProperty> addAlarmProperties = alarmInfo.getAlarm_Property();
@@ -244,12 +219,6 @@ public class AlarmFragment extends Fragment {
                         setAlarms.set(p, setAlarm);
                     }
                 } else {
-//                Intent i = new Intent(getContext(), AlarmService2.class);
-//                Bundle b = new Bundle();
-//                b.putParcelableArrayList("medAlarmContents", medAlarmContents);
-//                i.putExtras(b);
-//                getActivity().startActivity(i);
-//                getActivity().bindService(i, conn, Context.BIND_AUTO_CREATE);
                     if (medAlarmContents != null) {
                         Intent i = new Intent(getContext(), AlarmService2.class);
                         Bundle b = new Bundle();
@@ -260,38 +229,10 @@ public class AlarmFragment extends Fragment {
                             getActivity().bindService(i, conn, Context.BIND_AUTO_CREATE);
                             isBind = true;
                         }
-
                     }
                 }
             }
-
         }
-//        send_alarmPropertyBroadcast();
-//        Map<String, Integer> alarmTime = new HashMap<>();
-//        alarmTime.put("minute", 34);
-//        alarmTime.put("hourOfDay", 15);
-//        alarmTime.put("dayOfMonth", 14);
-//        alarmTime.put("monthOfYear", 8);
-//        alarmTime.put("year", 2016);
-//        Map<String, Integer> resTime = new HashMap<>();
-//        resTime.put("dayOfMonth", 99);
-//        resTime.put("hourOfDay", 19);
-//        resTime.put("minute", 54);
-//        MedAlarmContent medAlarmContent = new MedAlarmContent("可达宁", alarmTime, "2片", "口服", resTime);
-//        medAlarmContents.add(medAlarmContent);
-//
-//        Map<String, Integer> alarmTime2 = new HashMap<>();
-//        alarmTime2.put("minute", 35);
-//        alarmTime2.put("hourOfDay", 15);
-//        alarmTime2.put("dayOfMonth", 18);
-//        alarmTime2.put("monthOfYear", 8);
-//        alarmTime2.put("year", 2016);
-//        Map<String, Integer> resTime2 = new HashMap<>();
-//        resTime2.put("dayOfMonth", 99);
-//        resTime2.put("hourOfDay", 19);
-//        resTime2.put("minute", 52);
-//        MedAlarmContent medAlarmContent2 = new MedAlarmContent("日益百服宁", alarmTime2, "1片", "口服", resTime2);
-//        medAlarmContents.add(medAlarmContent2);
     }
 
     @Override
@@ -336,6 +277,10 @@ public class AlarmFragment extends Fragment {
         }
     }
 
+    /***
+     * 添加新alarm回到该activity的处理
+     * @param intent
+     */
     public void dealNewAlarm(Intent intent){
         AddAlarmProperty alarmProperty = null;
         Bundle b = intent.getExtras();
@@ -369,6 +314,7 @@ public class AlarmFragment extends Fragment {
             }
             Map<String, Integer> resTime = new HashMap<>();
             resTime = customMethod.getResTime(alarmProperty.getAlarmTime());
+            //将alarm属性转成content
             MedAlarmContent medAlarmContent = new MedAlarmContent(alarmProperty.getName(), alarmProperty.getAlarmTime(),
                     alarmProperty.getDose(), alarmProperty.getWay(), resTime);
             medAlarmContents.add(medAlarmContent);
@@ -378,6 +324,7 @@ public class AlarmFragment extends Fragment {
             System.out.println("服务是否已经开启：" + new CustomMethod().isServiceWork(getContext(), "com.competition.kakin.mtreatment.service.AlarmService2"));
             if (customMethod.isServiceWork(getContext(), "com.competition.kakin.mtreatment.service.AlarmService2")) {
                 Intent i = new Intent(getContext(), AlarmService2.class);
+                //解出绑定和停止服务，再重新开过
                 getContext().unbindService(conn);
                 getContext().stopService(i);
                 Bundle bundle = new Bundle();
@@ -395,6 +342,11 @@ public class AlarmFragment extends Fragment {
             }
         }
     }
+
+    /***
+     *修改alarm回到该activity时的处理
+     * @param intent
+     */
     private void alterAlarm(Intent intent){
         AddAlarmProperty alarmProperty = intent.getExtras().getParcelable("alarmProperty");
         int position = intent.getIntExtra("position", 0);
@@ -428,6 +380,11 @@ public class AlarmFragment extends Fragment {
             getContext().bindService(i, conn, Context.BIND_AUTO_CREATE);
         }
     }
+
+    /***
+     * 删除alarm的处理，未解决
+     * @param intent
+     */
     private void delAlarm(Intent intent){
         final int position = intent.getIntExtra("position", 0);
         final AlarmInfo alarmInfo = new AlarmInfo(getContext());
@@ -440,6 +397,9 @@ public class AlarmFragment extends Fragment {
                     ArrayList<AddAlarmProperty> addAlarmProperties = alarmInfo.getAlarm_Property();
                     ArrayList<Boolean> setAlarms = alarmInfo.getIsSetAlarms();
                     Intent i = new Intent(getContext(), AlarmService2.class);
+                    i.setAction("com.competition.kakin.mtreatment.broadcast.cancelalarmbroadcast");//发送广播，让它取消alarmManager
+                    i.putExtra("position", position);
+                    getActivity().sendBroadcast(i);
                     getContext().unbindService(conn);
                     getContext().stopService(i);
                     try {
@@ -458,13 +418,13 @@ public class AlarmFragment extends Fragment {
                     Bundle bundle = new Bundle();
                     bundle.putParcelableArrayList("medAlarmContents", medAlarmContentArrayList);
                     msg.setData(bundle);
-                    handler.sendMessage(msg);
+                    handler.sendMessage(msg);//利用handler刷新listview，但没用
                     i.putExtras(bundle);
                     getContext().startService(i);
                     getContext().bindService(i, conn, Context.BIND_AUTO_CREATE);
                 }
             }.start();
-        }else {
+        }else {//没有这种情况，忽视..
             addAlarmProperties = alarmInfo.getAlarm_Property();
             setAlarms = alarmInfo.getIsSetAlarms();
             addAlarmProperties.remove(position);
@@ -473,12 +433,14 @@ public class AlarmFragment extends Fragment {
             medAlarmAdapter.notifyDataSetChanged();
             alarmInfo.setIsSetAlarms(setAlarms);
             alarmInfo.setAlarm_Property(addAlarmProperties);
-            Intent i = new Intent(getContext(), AlarmService2.class);
-            Bundle bundle = new Bundle();
-            bundle.putParcelableArrayList("medAlarmContents", (ArrayList<? extends Parcelable>) medAlarmContents);
-            i.putExtras(bundle);
-            getContext().startService(i);
-            getContext().bindService(i, conn, Context.BIND_AUTO_CREATE);
+            if (medAlarmContents.size() > 0){
+                Intent i = new Intent(getContext(), AlarmService2.class);
+                Bundle bundle = new Bundle();
+                bundle.putParcelableArrayList("medAlarmContents", (ArrayList<? extends Parcelable>) medAlarmContents);
+                i.putExtras(bundle);
+                getContext().startService(i);
+                getContext().bindService(i, conn, Context.BIND_AUTO_CREATE);
+            }
         }
     }
 }

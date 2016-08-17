@@ -4,13 +4,16 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.competition.kakin.mtreatment.MedAlarmContent;
 import com.competition.kakin.mtreatment.UI.Notifi.ClockActivity;
+import com.competition.kakin.mtreatment.broadcast.CancelAlarmReceiver;
 import com.competition.kakin.mtreatment.tool.AlarmInfo;
 
 import java.util.ArrayList;
@@ -22,9 +25,10 @@ import java.util.Map;
  * Created by kakin on 2016/8/13.
  */
 public class AlarmService2 extends Service{
-    ArrayList<MedAlarmContent> medAlarmContents;
-    ArrayList<Map<String, Integer>> resTimes ;
-    ArrayList<Boolean> setAlarms;
+    ArrayList<MedAlarmContent> medAlarmContents;//content
+    ArrayList<Map<String, Integer>> resTimes ;//剩余时间
+    ArrayList<Boolean> setAlarms;//是否在倒计时
+    CancelAlarmReceiver[]  cancelAlarmReceivers;
     private TimeBinder timeBinder = new TimeBinder();
     @Nullable
     @Override
@@ -50,8 +54,8 @@ public class AlarmService2 extends Service{
             b = intent.getExtras();
             medAlarmContents = b.getParcelableArrayList("medAlarmContents");
         }
-        System.out.println("medAlarmContents大小为：" + medAlarmContents.size());
         resTimes = new ArrayList<>(medAlarmContents.size());
+        cancelAlarmReceivers = new CancelAlarmReceiver[medAlarmContents.size()];
         for (int i = 0; i < medAlarmContents.size(); i++){
             final Map<String, Integer> theEndTime = medAlarmContents.get(i).getAlarmTime();
             final int p = i;
@@ -71,10 +75,12 @@ public class AlarmService2 extends Service{
             alarmCalendar.set(Calendar.DAY_OF_MONTH, theAlarmDay);
             alarmCalendar.set(Calendar.MONTH, theAlarmMonth - 1);
             alarmCalendar.set(Calendar.YEAR, theAlarmYear);
-            System.out.println("闹响时间：" + alarmCalendar.get(Calendar.YEAR)+alarmCalendar.get(Calendar.MONTH)
-                    +alarmCalendar.get(Calendar.DAY_OF_MONTH) + alarmCalendar.get(Calendar.HOUR_OF_DAY) + alarmCalendar.get(Calendar.MINUTE));
             final long alarmCalendarTime = alarmCalendar.getTimeInMillis();
             alarmManager.set(AlarmManager.RTC_WAKEUP, alarmCalendarTime, pendingIntent);
+            cancelAlarmReceivers[i] = new CancelAlarmReceiver(i, alarmManager, pendingIntent);//接收广播时取消alarmManager
+            IntentFilter filter = new IntentFilter("com.competition.kakin.mtreatment.broadcast.cancelalarmbroadcast");
+            registerReceiver(cancelAlarmReceivers[i], filter);
+            //倒计时
             if (setAlarms.get(p) == true){
                     new Thread(){
                         @Override
@@ -158,6 +164,9 @@ public class AlarmService2 extends Service{
             Boolean setAlarm = setAlarms.get(i);
             setAlarm = false;
             setAlarms.set(i, setAlarm);
+        }
+        for (int i = 0; i < cancelAlarmReceivers.length; i++){//所有接收取消闹钟的广播注销掉
+            unregisterReceiver(cancelAlarmReceivers[i]);
         }
     }
 }
