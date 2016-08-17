@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="160dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_header">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="160dp"
+        android:src="@drawable/nav_header_bg"
+        android:scaleType="centerCrop"/>
+
+    <com.competition.kakin.mtreatment.tool.CustomImageView
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/img_user"
+        app:circle="true"
+        app:theme="@style/AppTheme"
+        android:layout_marginBottom="42dp"
+        android:layout_marginLeft="9dp"
+        android:layout_gravity="left|bottom"></com.competition.kakin.mtreatment.tool.CustomImageView>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="kakin"
+        android:textSize="24dp"
+        android:textColor="@color/text_white"
+        android:layout_marginLeft="19dp"
+        android:layout_marginBottom="7dp"
+        android:layout_gravity="left|bottom" />
+</FrameLayout>

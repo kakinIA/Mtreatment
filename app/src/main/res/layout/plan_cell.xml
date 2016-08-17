@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:layout_width="360dp"
+        android:layout_height="120dp"
+        android:src="@drawable/plan_run"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/plan_img" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="慢跑有氧运动计划"
+        android:textSize="21dp"
+        android:textStyle="bold"
+        android:layout_below="@+id/plan_img"
+        android:layout_alignStart="@+id/plan_img"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="14dp"
+        android:id="@+id/plan_title" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="周期：56周"
+        android:textSize="16dp"
+        android:layout_below="@+id/plan_title"
+        android:layout_alignStart="@+id/plan_title"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="9dp"
+        android:id="@+id/plan_period" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:text="添加计划"
+        android:background="@color/add_plan_blue"
+        android:textColor="@color/text_white"
+        android:layout_alignTop="@+id/plan_title"
+        android:layout_alignEnd="@+id/plan_img"
+        android:layout_marginEnd="31dp"
+        android:id="@+id/btn_addplan" />
+    <TextView
+        android:id="@+id/grey_line"
+        android:layout_width="330dp"
+        android:layout_height="1dp"
+        android:background="@color/grey_line"
+        android:layout_below="@+id/plan_period"
+        android:layout_marginTop="4dp"
+        android:layout_centerHorizontal="true" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="本计划非常好，慢跑是目前所知道的运动当中最有益的运动，能强身健体，收心养性！"
+        android:layout_marginTop="9dp"
+        android:id="@+id/plan_introduce"
+        android:layout_below="@+id/grey_line"
+        android:layout_alignStart="@+id/plan_title"
+        android:layout_alignEnd="@+id/plan_img" />
+
+</RelativeLayout>

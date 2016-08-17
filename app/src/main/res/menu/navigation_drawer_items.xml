@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group
+        android:id="@+id/part_one"
+        android:checkableBehavior="all">
+        <item
+            android:id="@+id/navRecord"
+            android:icon="@drawable/record"
+            android:title="健康档案"/>
+        <item
+            android:id="@+id/navDoctors"
+            android:icon="@drawable/doctors"
+            android:title="我的医生"/>
+
+        <item
+            android:id="@+id/navPlan"
+            android:icon="@drawable/plan"
+            android:title="健康计划"/>
+
+        <item
+            android:id="@+id/navNotifi"
+            android:icon="@drawable/msg"
+            android:title="消息与提醒"/>
+
+    </group>
+
+    <group
+        android:id="@+id/part_two">
+        <item
+            android:id="@+id/navSetting"
+            android:icon="@drawable/setting"
+            android:title="设置" />
+
+    </group>
+    <item android:title="">
+        <menu>
+        </menu>
+    </item>
+
+</menu>

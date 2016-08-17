@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+        <style name="AppTheme.haveActionBar">
+                <item name="windowActionBar">true</item>
+                <item name="windowNoTitle">false</item>
+                <item name="colorAccent">#3ac169</item>
+                <item name="android:actionBarStyle">@style/ThemeOverlay.AppCompat.Dark.ActionBar
+                </item>
+                <item name="android:popupTheme">@style/Theme.AppCompat.Light.DarkActionBar</item>
+        </style>
+</resources>
