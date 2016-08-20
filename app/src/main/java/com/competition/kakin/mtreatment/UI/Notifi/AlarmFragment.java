@@ -72,16 +72,18 @@ public class AlarmFragment extends Fragment {
                     break;
                 case UPDATA_CONTENTS://剩余时间为0时删除content而更新listview
                     ArrayList<MedAlarmContent> medAlarmContentList = msg.getData().getParcelableArrayList("upDataContents");
-                    medAlarmContents = medAlarmContentList;
-                    medAlarmAdapter = new MedAlarmAdapter(getContext(), R.layout.medalarm_cell, medAlarmContents);
-                    listView.setAdapter(medAlarmAdapter);
+                    medAlarmContents.clear();
+                    medAlarmContents.addAll(medAlarmContentList);
                     medAlarmAdapter.notifyDataSetChanged();
                     break;
                 case UPDATA_CONTENTDEL://主动删除content而更新listview
-                    ArrayList<MedAlarmContent> medAlarmContentLista = msg.getData().getParcelableArrayList("medAlarmContents");
-                    medAlarmAdapter = new MedAlarmAdapter(getContext(), R.layout.medalarm_cell, medAlarmContentLista);
-                    listView.setAdapter(medAlarmAdapter);
+//                    ArrayList<MedAlarmContent> medAlarmContentLista = msg.getData().getParcelableArrayList("medAlarmContents");
+//                    medAlarmContents.clear();
+//                    medAlarmContents.addAll(medAlarmContentLista);
                     medAlarmAdapter.notifyDataSetChanged();
+//                    medAlarmAdapter = new MedAlarmAdapter(getContext(), R.layout.medalarm_cell, medAlarmContentLista);
+//                    listView.setAdapter(medAlarmAdapter);
+//                    medAlarmAdapter.notifyDataSetChanged();
                 default:
                     break;
             }
@@ -159,7 +161,6 @@ public class AlarmFragment extends Fragment {
 
                 @Override
                 public void setEndContent(ArrayList<MedAlarmContent> medAlarmContentlist) {//每过1s回调一次更新content
-                    medAlarmContents = medAlarmContentlist;
                     if (medAlarmContents.size() == 0){
                         Message msg = new Message();
                         msg.what = UPDATA_CONTENTS;
@@ -403,7 +404,7 @@ public class AlarmFragment extends Fragment {
                     getContext().unbindService(conn);
                     getContext().stopService(i);
                     try {
-                        sleep(3000);//只能延迟3秒以上才不会出错啊，哎，关了服务线程还没有立刻关所以会出错~
+                        sleep(2000);//只能延迟2秒以上才不会出错啊，关了服务线程还没有立刻关所以会出错~最后的方法是判定线程确实关掉才重新开一个
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -411,14 +412,15 @@ public class AlarmFragment extends Fragment {
                     setAlarms.remove(position);
                     alarmInfo.setIsSetAlarms(setAlarms);
                     alarmInfo.setAlarm_Property(addAlarmProperties);
-                    ArrayList<MedAlarmContent> medAlarmContentArrayList = medAlarmContents;
-                    medAlarmContentArrayList.remove(position);
+//                    ArrayList<MedAlarmContent> medAlarmContentArrayList = medAlarmContents;
+//                    medAlarmContentArrayList.remove(position);
+                    medAlarmContents.remove(position);
                     Message msg = new Message();
                     msg.what = UPDATA_CONTENTDEL;
                     Bundle bundle = new Bundle();
-                    bundle.putParcelableArrayList("medAlarmContents", medAlarmContentArrayList);
-                    msg.setData(bundle);
-                    handler.sendMessage(msg);//利用handler刷新listview，但没用
+                    bundle.putParcelableArrayList("medAlarmContents", medAlarmContents);
+//                    msg.setData(bundle);
+                    handler.sendMessage(msg);
                     i.putExtras(bundle);
                     getContext().startService(i);
                     getContext().bindService(i, conn, Context.BIND_AUTO_CREATE);

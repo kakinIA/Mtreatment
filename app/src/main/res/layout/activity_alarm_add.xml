@@ -84,7 +84,7 @@
             />
 
         <TimePicker
-            android:layout_width="160dp"
+            android:layout_width="180dp"
             android:layout_height="32dp"
             android:layout_below="@+id/tv_alarm_time"
             android:layout_centerHorizontal="true"

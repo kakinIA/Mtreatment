@@ -54,7 +54,7 @@ public class AlarmService2 extends Service{
             b = intent.getExtras();
             medAlarmContents = b.getParcelableArrayList("medAlarmContents");
         }
-        resTimes = new ArrayList<>(medAlarmContents.size());
+        resTimes = new ArrayList<>();
         cancelAlarmReceivers = new CancelAlarmReceiver[medAlarmContents.size()];
         for (int i = 0; i < medAlarmContents.size(); i++){
             final Map<String, Integer> theEndTime = medAlarmContents.get(i).getAlarmTime();
@@ -111,7 +111,7 @@ public class AlarmService2 extends Service{
                                         resTimes.get(p).put("second", 0);
                                         showCallBack.onTimeShow(resTimes);
                                         try {
-                                            sleep(200);
+                                            sleep(2000);
                                         } catch (InterruptedException e) {
                                             e.printStackTrace();
 
