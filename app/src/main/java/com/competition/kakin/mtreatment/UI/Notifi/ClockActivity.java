@@ -20,6 +20,7 @@ import java.util.ArrayList;
  */
 public class ClockActivity extends Activity{
     private MediaPlayer mediaPlayer;
+    private int index = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,18 +32,23 @@ public class ClockActivity extends Activity{
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 Intent i = getIntent();
-                int p = i.getIntExtra("index", 0);
-                System.out.println("被移除的是" + p);
+                index = i.getIntExtra("index", 0);
+                System.out.println("被移除的是" + index);
                 mediaPlayer.stop();
                 ClockActivity.this.finish();
-                AlarmInfo alarmInfo = new AlarmInfo(ClockActivity.this);
-                ArrayList<AddAlarmProperty> addAlarmProperties = alarmInfo.getAlarm_Property();
-                if (addAlarmProperties.size() > 0){
-                    addAlarmProperties.remove(p);
-                    alarmInfo.setAlarm_Property(addAlarmProperties);
 
-                }
             }
         }).show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+//        AlarmInfo alarmInfo = new AlarmInfo(ClockActivity.this);
+//        ArrayList<AddAlarmProperty> addAlarmProperties = alarmInfo.getAlarm_Property();
+//        if (addAlarmProperties.size() > 0){
+//            addAlarmProperties.remove(index);
+//            alarmInfo.setAlarm_Property(addAlarmProperties);
+//        }
     }
 }

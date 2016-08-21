@@ -62,18 +62,21 @@ public class AlarmFragment extends Fragment {
             super.handleMessage(msg);
             switch (msg.what){
                 case UPDATA_TIME://更新时间到listview
-                    SeriaLizableMapList timeMapList = (SeriaLizableMapList) msg.getData().getSerializable("resTimes");
-                    List<Map<String, Integer>> resTimes = timeMapList.getMapList();
-                    for (int i = 0; i < resTimes.size(); i++){
-                        Map<String, Integer> resTime = resTimes.get(i);
-                        medAlarmContents.get(i).setResTime(resTime);
-                        medAlarmAdapter.notifyDataSetChanged();
-                    }
+//                    ArrayList<MedAlarmContent> medAlarmContentLista = msg.getData().getParcelableArrayList("upDataContents");
+//                    medAlarmContents.clear();
+//                    medAlarmContents.addAll(medAlarmContentLista);
+                    medAlarmAdapter.notifyDataSetChanged();
+//                    SeriaLizableMapList timeMapList = (SeriaLizableMapList) msg.getData().getSerializable("resTimes");
+//                    List<Map<String, Integer>> resTimes = timeMapList.getMapList();
+//                    for (int i = 0; i < resTimes.size(); i++){
+//                        Map<String, Integer> resTime = resTimes.get(i);
+//                        medAlarmContents.get(i).setResTime(resTime);
+//                        medAlarmAdapter.notifyDataSetChanged();
+//                    }
+
                     break;
                 case UPDATA_CONTENTS://剩余时间为0时删除content而更新listview
-                    ArrayList<MedAlarmContent> medAlarmContentList = msg.getData().getParcelableArrayList("upDataContents");
-                    medAlarmContents.clear();
-                    medAlarmContents.addAll(medAlarmContentList);
+//                    ArrayList<MedAlarmContent> medAlarmContentList = msg.getData().getParcelableArrayList("upDataContents");
                     medAlarmAdapter.notifyDataSetChanged();
                     break;
                 case UPDATA_CONTENTDEL://主动删除content而更新listview
@@ -131,7 +134,7 @@ public class AlarmFragment extends Fragment {
         fabHist.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                medAlarmAdapter.notifyDataSetChanged();
             }
         });
         initAlarmContents();//初始化content
@@ -145,30 +148,57 @@ public class AlarmFragment extends Fragment {
 //            timeBinder.setEndTime(theEndTime);
             timeBinder.getService().setShowCallBack(new AlarmService2.ShowCallBack() {
                 @Override
-                public void onTimeShow(ArrayList<Map<String, Integer>> resTimes) {//每过1s回调resTime（剩余时间）一次
+                public void UpdataContent(ArrayList<MedAlarmContent> medAlarmContentlist) {//每过1s回调resTime（剩余时间）一次
+                    System.out.println("执行了onTimeShow");
                     Message msg = new Message();
                     msg.what = UPDATA_TIME;
-                    Bundle b = new Bundle();
-                    SeriaLizableMapList timeMapList = new SeriaLizableMapList();
-                    timeMapList.setMapList(resTimes);
-                    b.putSerializable("resTimes", timeMapList);
-//                    SerializableMap timeMap = new SerializableMap();
-//                    timeMap.setMap(resTime);
-//                    b.putSerializable("TimeMap", timeMap);
-                    msg.setData(b);
+                    medAlarmContents.clear();
+                    medAlarmContents.addAll(medAlarmContentlist);
+                    System.out.println("此时medAlarmContents的长度：" + medAlarmContents.size());
                     handler.sendMessage(msg);
                 }
 
                 @Override
-                public void setEndContent(ArrayList<MedAlarmContent> medAlarmContentlist) {//每过1s回调一次更新content
-                    if (medAlarmContents.size() == 0){
-                        Message msg = new Message();
-                        msg.what = UPDATA_CONTENTS;
-                        Bundle b =new Bundle();
-                        b.putParcelableArrayList("upDataContents", medAlarmContentlist);
-                        msg.setData(b);
-                        handler.sendMessage(msg);
-                    }
+                public void UpdataEndContent(final ArrayList<MedAlarmContent> medAlarmContentList, int p) {//每过1s回调一次更新content
+                    System.out.println("执行了setEndContent");
+                    final int position = p;
+                    new Thread(){
+                        @Override
+                        public void run() {
+                            AlarmInfo alarmInfo = new AlarmInfo(getContext());
+                            ArrayList<MedAlarmContent> medAlarmContentlist = new ArrayList<MedAlarmContent>();
+                            medAlarmContentlist.addAll(medAlarmContentList);
+                            Intent i = new Intent(getContext(), AlarmService2.class);
+                            //解出绑定和停止服务，再重新开过
+                            getContext().unbindService(conn);
+                            getContext().stopService(i);
+                            try {
+                                sleep(2000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            ArrayList<AddAlarmProperty> addAlarmProperties = alarmInfo.getAlarm_Property();
+                            if (addAlarmProperties.size() > 0){
+                                addAlarmProperties.remove(position);
+                                alarmInfo.setAlarm_Property(addAlarmProperties);
+                            }
+                            ArrayList<Boolean> setAlarms = alarmInfo.getIsSetAlarms();
+                            setAlarms.remove(position);
+                            alarmInfo.setIsSetAlarms(setAlarms);
+                            medAlarmContentlist.remove(position);
+                            Message msg = new Message();
+                            msg.what = UPDATA_CONTENTS;
+                            medAlarmContents.clear();
+                            medAlarmContents.addAll(medAlarmContentlist);
+                            handler.sendMessage(msg);
+                            Bundle bundle = new Bundle();
+                            bundle.putParcelableArrayList("medAlarmContents", (ArrayList<? extends Parcelable>) medAlarmContents);
+                            i.putExtras(bundle);
+                            getContext().startService(i);
+                            getContext().bindService(i, conn, Context.BIND_AUTO_CREATE);
+                        }
+                    }.start();
+
                 }
             });
         }
@@ -244,10 +274,6 @@ public class AlarmFragment extends Fragment {
         if (isBind){
             getActivity().unbindService(conn);
         }
-//        if (isServiceStart){
-//            getActivity().stopService(new Intent(getContext(), AlarmService2.class));
-//        }
-//        getActivity().unregisterReceiver(alarmPropertyReceiver);
     }
 
     @Override
@@ -294,7 +320,6 @@ public class AlarmFragment extends Fragment {
             if (alarmInfo.getAlarm_Property() != null){
                 ArrayList<AddAlarmProperty> addAlarmProperties = alarmInfo.getAlarm_Property();
                 ArrayList<Boolean> setAlarms = alarmInfo.getIsSetAlarms();
-                System.out.println("添加第二次之前" + setAlarms.size());
                 addAlarmProperties.add(theAddAlarmProperty);
                 setAlarms.add(setAlarm);
                 alarmInfo.setAlarm_Property(addAlarmProperties);
@@ -304,7 +329,6 @@ public class AlarmFragment extends Fragment {
             }else {
                 ArrayList<AddAlarmProperty> addAlarmProperties = new ArrayList<>();
                 ArrayList<Boolean> setAlarms = new ArrayList<>();
-                System.out.println("添加第二次之前" + setAlarms.size());
                 addAlarmProperties.add(theAddAlarmProperty);
                 setAlarms.add(setAlarm);
                 alarmInfo.setAlarm_Property(addAlarmProperties);
@@ -398,16 +422,15 @@ public class AlarmFragment extends Fragment {
                     ArrayList<AddAlarmProperty> addAlarmProperties = alarmInfo.getAlarm_Property();
                     ArrayList<Boolean> setAlarms = alarmInfo.getIsSetAlarms();
                     Intent i = new Intent(getContext(), AlarmService2.class);
-                    i.setAction("com.competition.kakin.mtreatment.broadcast.cancelalarmbroadcast");//发送广播，让它取消alarmManager
-                    i.putExtra("position", position);
-                    getActivity().sendBroadcast(i);
                     getContext().unbindService(conn);
                     getContext().stopService(i);
-                    try {
-                        sleep(2000);//只能延迟2秒以上才不会出错啊，关了服务线程还没有立刻关所以会出错~最后的方法是判定线程确实关掉才重新开一个
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    //我在刷新content时，用了不立刻在原来的线程上删除，而是重新又建立线程，当运行都一定的时候原来线程自己结束，
+                    //所以不用延迟2s，但是在listview的adapter加载时可能会出错，报index溢出错误。是medAlarmAdapter.没能及时刷新的原因？？
+//                    try {
+//                        sleep(2000);//只能延迟2秒以上才不会出错啊，关了服务线程还没有立刻关所以会出错~最后的方法是判定线程确实关掉才重新开一个
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
                     addAlarmProperties.remove(position);
                     setAlarms.remove(position);
                     alarmInfo.setIsSetAlarms(setAlarms);

@@ -18,14 +18,17 @@ import java.util.List;
  */
 public class MedAlarmAdapter extends ArrayAdapter<MedAlarmContent> {
     private int resId;
+    private List<MedAlarmContent> medAlarmContents;
     public MedAlarmAdapter(Context context, int resource, List<MedAlarmContent> medAlarmContents) {
         super(context, resource, medAlarmContents);
         resId = resource;
+        this.medAlarmContents = medAlarmContents;
     }
+
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        MedAlarmContent medAlarmContent = getItem(position);
+        MedAlarmContent medAlarmContent = medAlarmContents.get(position);
         View view;
         ViewHolder viewHolder;
         if (convertView == null){

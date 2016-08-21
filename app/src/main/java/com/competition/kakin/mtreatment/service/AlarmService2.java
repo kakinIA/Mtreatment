@@ -4,12 +4,10 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.competition.kakin.mtreatment.MedAlarmContent;
 import com.competition.kakin.mtreatment.UI.Notifi.ClockActivity;
@@ -55,15 +53,10 @@ public class AlarmService2 extends Service{
             medAlarmContents = b.getParcelableArrayList("medAlarmContents");
         }
         resTimes = new ArrayList<>();
-        cancelAlarmReceivers = new CancelAlarmReceiver[medAlarmContents.size()];
         for (int i = 0; i < medAlarmContents.size(); i++){
             final Map<String, Integer> theEndTime = medAlarmContents.get(i).getAlarmTime();
             final int p = i;
             resTimes.add(p, new HashMap<String, Integer>());
-            AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-            Intent clockIntent = new Intent(this, ClockActivity.class);
-            clockIntent.putExtra("index", p);
-            PendingIntent pendingIntent = PendingIntent.getActivity(this, i, clockIntent, 0);
             int theAlarmMinute = theEndTime.get("minute");
             int theAlarmHour = theEndTime.get("hourOfDay");
             int theAlarmDay = theEndTime.get("dayOfMonth");
@@ -76,11 +69,6 @@ public class AlarmService2 extends Service{
             alarmCalendar.set(Calendar.MONTH, theAlarmMonth - 1);
             alarmCalendar.set(Calendar.YEAR, theAlarmYear);
             final long alarmCalendarTime = alarmCalendar.getTimeInMillis();
-            alarmManager.set(AlarmManager.RTC_WAKEUP, alarmCalendarTime, pendingIntent);
-            cancelAlarmReceivers[i] = new CancelAlarmReceiver(i, alarmManager, pendingIntent);//接收广播时取消alarmManager
-            IntentFilter filter = new IntentFilter("com.competition.kakin.mtreatment.broadcast.cancelalarmbroadcast");
-            registerReceiver(cancelAlarmReceivers[i], filter);
-            //倒计时
             if (setAlarms.get(p) == true){
                     new Thread(){
                         @Override
@@ -100,36 +88,33 @@ public class AlarmService2 extends Service{
                                 resTimes.get(p).put("hourOfDay", resAlarmHour);
                                 resTimes.get(p).put("minute", resAlarmMinute + 1);
                                 resTimes.get(p).put("second", resAlarmSecond);
+                                medAlarmContents.get(p).setResTime(resTimes.get(p));
                                 if (showCallBack != null){
-                                    showCallBack.onTimeShow(resTimes);
-                                    showCallBack.setEndContent(medAlarmContents);
-                                    if (betWeenTime < 0){
+                                    if (betWeenTime >= 0){
+                                        showCallBack.UpdataContent(medAlarmContents);
+                                    }else {
                                         System.out.println("betWeenTime等于零时");
                                         resTimes.get(p).put("dayOfMonth", 0);
                                         resTimes.get(p).put("hourOfDay", 0);
                                         resTimes.get(p).put("minute", 0);
                                         resTimes.get(p).put("second", 0);
-                                        showCallBack.onTimeShow(resTimes);
-                                        try {
-                                            sleep(2000);
-                                        } catch (InterruptedException e) {
-                                            e.printStackTrace();
-
-                                        }
-                                        resTimes.remove(p);
-                                        medAlarmContents.remove(p);
-                                        showCallBack.setEndContent(medAlarmContents);
-                                        setAlarms.remove(p);
-                                        new AlarmInfo(getBaseContext()).setIsSetAlarms(setAlarms);
+                                        showCallBack.UpdataEndContent(medAlarmContents, p);
+                                        Intent clockIntent = new Intent(AlarmService2.this, ClockActivity.class);
+                                        clockIntent.putExtra("index", p);
+                                        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                                        PendingIntent pendingIntent = PendingIntent.getActivity(getBaseContext(), p, clockIntent, 0);
+                                        alarmManager.set(AlarmManager.RTC_WAKEUP, alarmCalendarTime, pendingIntent);
+                                        System.out.println("--------线程" + Thread.currentThread().getId() + "停止");
                                         break;
                                     }
 
                                 }
                                 if (setAlarms.get(p)== false){
+                                    System.out.println("--------线程" + Thread.currentThread().getId() + "停止");
                                     break;
                                 }
                                 try {
-                                    sleep(1000);
+                                    sleep(10*1000);
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
@@ -143,8 +128,8 @@ public class AlarmService2 extends Service{
         return super.onStartCommand(intent, flags, startId);
     }
     public interface ShowCallBack{
-        void onTimeShow(ArrayList<Map<String, Integer>> resTimes);
-        void setEndContent(ArrayList<MedAlarmContent> medAlarmContents);
+        void UpdataContent(ArrayList<MedAlarmContent> medAlarmContents);
+        void UpdataEndContent(ArrayList<MedAlarmContent> medAlarmContents, int position);
     }
     private ShowCallBack showCallBack =null;
 
@@ -165,8 +150,6 @@ public class AlarmService2 extends Service{
             setAlarm = false;
             setAlarms.set(i, setAlarm);
         }
-        for (int i = 0; i < cancelAlarmReceivers.length; i++){//所有接收取消闹钟的广播注销掉
-            unregisterReceiver(cancelAlarmReceivers[i]);
-        }
+
     }
 }
