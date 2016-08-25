@@ -134,7 +134,6 @@ public class AlarmAddActivity extends Activity implements AppCompatCallback, Vie
                 intent.putExtras(b);
                 setResult(44, intent);
                 finish();
-//                send_alarmPropertyBroadcast();
                 return true;
         }
         return super.onOptionsItemSelected(item);

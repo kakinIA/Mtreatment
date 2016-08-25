@@ -27,7 +27,7 @@ public class ClockActivity extends Activity{
         setContentView(R.layout.activity_clock);
         mediaPlayer = MediaPlayer.create(ClockActivity.this, R.raw.sound);
         mediaPlayer.start();
-        new AlertDialog.Builder(ClockActivity.this).setTitle("闹钟").setMessage("dasfdf").setPositiveButton("close alarm",
+        new AlertDialog.Builder(ClockActivity.this).setTitle("闹钟").setMessage("已到时").setPositiveButton("close alarm",
         new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {

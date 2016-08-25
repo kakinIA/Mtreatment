@@ -170,7 +170,7 @@ public class AlarmActivity extends Activity implements AppCompatCallback, TimePi
      */
     private void init_date(){
         tvyear.setText(addAlarmProperty.getAlarmTime().get("year") + "");
-        tvmonth.setText(addAlarmProperty.getAlarmTime().get("monthOfYear") + 1 + "");
+        tvmonth.setText(addAlarmProperty.getAlarmTime().get("monthOfYear") + "");
         tvday.setText(addAlarmProperty.getAlarmTime().get("dayOfMonth") + "");
 
     }

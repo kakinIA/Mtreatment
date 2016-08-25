@@ -1,5 +1,11 @@
 package com.competition.kakin.mtreatment.UI;
 
+import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
@@ -15,6 +21,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.competition.kakin.mtreatment.R;
+import com.competition.kakin.mtreatment.UI.Notifi.AlarmAddActivity;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -31,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     NotifiFragment notifiFragment = new NotifiFragment();
     SettingFragment settingFragment = new SettingFragment();
 
-//    private IntentFilter receiverIntentFilter;
+
 //    private MsgReceiver msgReceiver;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,41 +48,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         init_page();
         init_instances();
 
-//        receiverIntentFilter = new IntentFilter();
-//        receiverIntentFilter.addAction("android.provider.Telephony.SMS_RECEIVED");
-//        msgReceiver = new MsgReceiver();
-//        registerReceiver(msgReceiver, receiverIntentFilter);
     }
 
-//    public class MsgReceiver extends BroadcastReceiver {
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            Bundle bundle = intent.getExtras();
-//            System.out.println("开始1");
-////            SmsMessage msg = null;
-////            if (bundle != null){
-////                System.out.println("开始2");
-////                Object[] smsobj = (Object[]) bundle.get("pdus");
-////                for (Object obj : smsobj){
-////                    msg = SmsMessage.createFromPdu((byte[]) obj);
-////                    System.out.println("时间："+ msg.getTimestampMillis() + "\n" +
-////                            "内容:" + msg.getMessageBody() + "\n" +
-////                            "地址：" + msg.getDisplayOriginatingAddress());
-////                }
-////            }
-//            Object[] pdus = (Object[]) bundle.get("pdus");
-//            SmsMessage[] msgs = new SmsMessage[pdus.length];
-//            for (int i = 0; i < msgs.length; i++ ){
-//                msgs[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
-//            }
-//            String address = msgs[0].getOriginatingAddress();
-//            String fullMsg = "";
-//            for (SmsMessage msg : msgs){
-//                fullMsg += msg.getMessageBody();
-//            }
-//            System.out.println("address:" + address + "\n" + "msg:" + fullMsg);
-//        }
-//    }
+
     private void init_toolbar(){
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("健康档案");
@@ -182,6 +157,5 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
     }
 }

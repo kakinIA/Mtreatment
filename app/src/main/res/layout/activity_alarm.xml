@@ -18,12 +18,13 @@
             app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"></android.support.v7.widget.Toolbar>
     </android.support.design.widget.AppBarLayout>
     <RelativeLayout
-        android:layout_width="340dp"
+        android:layout_width="match_parent"
         android:layout_height="270dp"
         android:background="@drawable/bodered_white_bg"
         android:layout_marginTop="20dp"
         android:layout_below="@+id/view333"
         android:layout_centerHorizontal="true"
+        android:layout_marginLeft="47dp"
         android:id="@+id/alarm_mainset">
         <ImageView
             android:layout_width="27dp"
@@ -103,12 +104,15 @@
         android:id="@+id/textView3" />
 
     <RelativeLayout
-        android:layout_width="340dp"
-        android:layout_height="200dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:background="@drawable/bodered_white_bg"
         android:layout_marginTop="12dp"
         android:layout_below="@+id/textView3"
-        android:layout_alignStart="@+id/alarm_mainset">
+        android:layout_alignStart="@+id/alarm_mainset"
+        android:layout_alignEnd="@+id/alarm_mainset"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="27dp">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -186,8 +190,7 @@
             android:layout_width="match_parent"
             android:layout_height="42dp"
             android:background="@color/purple_bg"
-            android:layout_below="@+id/alarm_date"
-            android:layout_marginTop="17dp"
+            android:layout_centerInParent="true"
             android:id="@+id/alarm_eatway">
 
             <ImageView
@@ -234,8 +237,8 @@
             android:layout_width="match_parent"
             android:layout_height="42dp"
             android:background="@color/purple_bg"
-            android:layout_below="@+id/alarm_eatway"
-            android:layout_marginTop="17dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="20dp"
             android:id="@+id/alarm_dose">
             <ImageView
                 android:layout_width="27dp"

@@ -114,7 +114,7 @@ public class AlarmService2 extends Service{
                                     break;
                                 }
                                 try {
-                                    sleep(10*1000);
+                                    sleep(7*1000);
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
@@ -124,6 +124,23 @@ public class AlarmService2 extends Service{
                         }
                     }.start();
             }
+        }
+        if (medAlarmContents.size() == 0){
+            new Thread(){
+                @Override
+                public void run() {
+                    for (int i = 0; i < 2; i ++){
+                        try {
+                            sleep(2000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        if (showCallBack != null){
+                            showCallBack.UpdataContent(medAlarmContents);
+                        }
+                    }
+                }
+            }.start();
         }
         return super.onStartCommand(intent, flags, startId);
     }
